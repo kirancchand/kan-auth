@@ -1,6 +1,6 @@
 package com.kan.kanAuth.vo;
 
-public class User {
+public class UserRequest {
 	private String username;
 	private String email;
 	private String password;
@@ -9,10 +9,11 @@ public class User {
     private String middleName;
     private String mobno;
     private String dateofbirth;
-    private int f_gender_id;
-    private int f_status_id;
-    private int f_usertype_id;
-    private int f_branch_id;
+    private ValueLabel gender;
+    private ValueLabel status;
+    private ValueLabel usertype;
+    private ValueLabel branch;
+    
 	
 	public String getUsername() {
 		return username;
@@ -62,28 +63,28 @@ public class User {
 	public void setDateofbirth(String dateofbirth) {
 		this.dateofbirth = dateofbirth;
 	}
-	public int getF_gender_id() {
-		return f_gender_id;
+	public ValueLabel getGender() {
+		return gender;
 	}
-	public void setF_gender_id(int f_gender_id) {
-		this.f_gender_id = f_gender_id;
+	public void setGender(ValueLabel gender) {
+		this.gender = gender;
 	}
-	public int getF_status_id() {
-		return f_status_id;
+	public ValueLabel getStatus() {
+		return status;
 	}
-	public void setF_status_id(int f_status_id) {
-		this.f_status_id = f_status_id;
+	public void setStatus(ValueLabel status) {
+		this.status = status;
 	}
-	public int getF_usertype_id() {
-		return f_usertype_id;
+	public ValueLabel getUsertype() {
+		return usertype;
 	}
-	public void setF_usertype_id(int f_usertype_id) {
-		this.f_usertype_id = f_usertype_id;
+	public void setUsertype(ValueLabel usertype) {
+		this.usertype = usertype;
 	}
-	public int getF_branch_id() {
-		return f_branch_id;
+	public ValueLabel getBranch() {
+		return branch;
 	}
-	public void setF_branch_id(int f_branch_id) {
-		this.f_branch_id = f_branch_id;
+	public void setBranch(ValueLabel branch) {
+		this.branch = branch;
 	}
 }

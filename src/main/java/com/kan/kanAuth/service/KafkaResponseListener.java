@@ -19,13 +19,13 @@ public class KafkaResponseListener {
     @Autowired
     private SqlQueryLoader sqlQueryLoader;
 
-    @KafkaListener(topics = "user-registration-response", groupId = "producer-service")
+    @KafkaListener(topics = "user-registration-response", groupId = "${spring.kafka.consumer.group-id}")
     public void handleConsumerResponse(String message) {
         try {
             JsonNode response = objectMapper.readTree(message);
             Long outboxId = response.get("outboxId").asLong();
             String status = response.get("status").asText();
-
+            System.out.println("response"+response);
             if ("SUCCESS".equals(status)) {
                 jdbcTemplate.update(sqlQueryLoader.get("update.outbox.success"), outboxId);
                 System.out.println("✅ Consumer confirmed SUCCESS for Outbox ID " + outboxId);

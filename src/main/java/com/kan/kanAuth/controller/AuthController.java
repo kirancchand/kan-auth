@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kan.kanAuth.service.AuthService;
 import com.kan.kanAuth.service.KafkaProducerService;
 import com.kan.kanAuth.vo.User;
+import com.kan.kanAuth.vo.UserRequest;
 
 @RestController
 @RequestMapping("/auth")
@@ -31,11 +32,11 @@ public class AuthController {
 	    }
 	    
 	    @PostMapping("/register")
-	    public String register(@RequestBody User requestBody) {
+	    public String register(@RequestBody UserRequest requestBody) {
 	    	System.out.print("requestBody");
 	    	System.out.print(requestBody);
 	    	String keycloakId = authService.createUser(requestBody.getUsername(), requestBody.getEmail(), requestBody.getPassword(),requestBody.getFirstName(),requestBody.getLastName());
-//	    	kafkaProducerService.sendUserEvent(requestBody);
+	    	kafkaProducerService.sendUserEvent(requestBody);
 //	    	
 	        return keycloakId;
 	    }

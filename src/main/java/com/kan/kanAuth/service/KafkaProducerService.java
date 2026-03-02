@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,10 +24,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kan.kanAuth.vo.KafkaSender;
 import com.kan.kanAuth.vo.User;
+import com.kan.kanAuth.vo.UserRequest;
+
 
 @Service
 public class KafkaProducerService {
-	
+	private static final Logger logger = LoggerFactory.getLogger(KafkaProducerService.class);
     @Autowired
 	private KafkaTemplate<String, String> kafkaTemplate;
     @Autowired
@@ -46,7 +50,7 @@ public class KafkaProducerService {
         this.sqlQueryLoader = sqlQueryLoader;
     }
 
-    public void sendUserEvent(User user) {
+    public void sendUserEvent(UserRequest user) {
     	try {
     		System.out.println("Sending to Kafka: ");
     		KafkaSender kafkaSender = new KafkaSender();
@@ -57,7 +61,7 @@ public class KafkaProducerService {
     		kafkaSender.setResponsetopic(TOPIC);
     		kafkaSender.setPayload(user);
     		String userSendJson = objectMapper.writeValueAsString(kafkaSender);
-    		
+    		logger.info("insert into kafka_outbox table");
     		String insertQuery = sqlQueryLoader.get("kafka.user.insert");
     		KeyHolder keyHolder = new GeneratedKeyHolder();
     		jdbcTemplate.update(con -> {
@@ -85,16 +89,20 @@ public class KafkaProducerService {
     public void sendToKafka(Long outboxId, String topic, Object sendData) {
         try {
             String senderData = objectMapper.writeValueAsString(sendData);
+            logger.info("sendToKafka function");
             kafkaTemplate.send(topic, senderData).whenComplete((result, ex) -> {
                 if (ex == null) {
-//                    handleSent(outboxId);
+                	logger.info("when send complete move to handle sent");
+                    handleSent(outboxId);
                     System.out.println("✅ Message delivered to Kafka for Outbox ID: " + outboxId);
                 } else {
+                	logger.info("when send complete move failed and handle kafka delivery failed");
 //                    handleFailed(outboxId);
                     handleKafkaDeliveryFailed(outboxId);
                 }
             });
         } catch (Exception e) {
+        	logger.info("catch when send complete move failed and handle kafka delivery failed");
 //            handleFailed(outboxId);
             handleKafkaDeliveryFailed(outboxId);
         }
