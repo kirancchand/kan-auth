@@ -6,6 +6,7 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -23,6 +24,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.web.client.RestTemplate;
 
+import com.kan.kanAuth.vo.KeycloakResponse;
+import com.kan.kanAuth.vo.KeycloakResponse;
 @Service
 public class AuthService {
 //	 	@Value("${keycloak.server-url}")
@@ -74,6 +77,7 @@ public class AuthService {
 	    private String clientSecret;
 
 	    private Keycloak keycloak;
+	    
 
 	    @PostConstruct
 	    public void init() {
@@ -87,9 +91,11 @@ public class AuthService {
 	                .build();
 	    }
 
-	    public String createUser(String username, String email, String password,String firstName,String lastName) {
+	    public KeycloakResponse createUser(String username, String email, String password,String firstName,String lastName) {
 	        // Create user without credentials
 	        UserRepresentation user = new UserRepresentation();
+	        KeycloakResponse keycloakResponse = new KeycloakResponse();
+	        
 	        user.setUsername(username);
 	        user.setEmail(email);
 	        user.setFirstName(firstName);        // Add this
@@ -99,15 +105,24 @@ public class AuthService {
 	        user.setRequiredActions(Collections.emptyList());
 
 	        Response response = keycloak.realm(realm).users().create(user);
-
+	        System.out.println("response"+response);
 	        if (response.getStatus() != 201) {
-	            if (response.getStatus() == 409) return "User already exists!";
-	            return "Failed: " + response.getStatus() + " - " + response.getStatusInfo();
+	            if (response.getStatus() == 409) {
+	            	keycloakResponse.setStatus(409);
+	            	keycloakResponse.setData(user);
+	            	keycloakResponse.setMessage("User already exists!");
+	            	return keycloakResponse;
+	            }
+	            
+	            keycloakResponse.setStatus(response.getStatus());
+            	keycloakResponse.setData(response.getEntity());
+            	keycloakResponse.setMessage("Failed: " + response.getStatus() + " - " + response.getStatusInfo());
+	            return keycloakResponse;
 	        }
 
 	        // Get the created user's ID
 	        String userId = CreatedResponseUtil.getCreatedId(response);
-
+	        System.out.print(userId);
 	        // Set password explicitly
 	        CredentialRepresentation passwordCred = new CredentialRepresentation();
 	        passwordCred.setTemporary(false);
@@ -115,8 +130,12 @@ public class AuthService {
 	        passwordCred.setValue(password);
 
 	        keycloak.realm(realm).users().get(userId).resetPassword(passwordCred);
-
-	        return "User created successfully!";
+	        
+	        keycloakResponse.setStatus(200);
+        	keycloakResponse.setData(userId);
+        	keycloakResponse.setMessage("User created successfully!");
+        	
+	        return keycloakResponse;
 	    }
 
 

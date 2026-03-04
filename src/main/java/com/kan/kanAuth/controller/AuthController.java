@@ -2,6 +2,7 @@ package com.kan.kanAuth.controller;
 
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.kan.kanAuth.service.AuthService;
 import com.kan.kanAuth.service.KafkaProducerService;
+import com.kan.kanAuth.vo.KeycloakResponse;
 import com.kan.kanAuth.vo.User;
 import com.kan.kanAuth.vo.UserRequest;
 
@@ -20,7 +22,8 @@ import com.kan.kanAuth.vo.UserRequest;
 public class AuthController {
 	 private final AuthService authService;
 	 private final KafkaProducerService kafkaProducerService;
-
+	 
+     
 	    public AuthController(AuthService authService,KafkaProducerService kafkaProducerService) {
 	        this.authService = authService;
 	        this.kafkaProducerService = kafkaProducerService;
@@ -32,13 +35,16 @@ public class AuthController {
 	    }
 	    
 	    @PostMapping("/register")
-	    public String register(@RequestBody UserRequest requestBody) {
+	    public KeycloakResponse register(@RequestBody UserRequest requestBody) {
+	    	KeycloakResponse keycloakResponse = new KeycloakResponse();
 	    	System.out.print("requestBody");
 	    	System.out.print(requestBody);
-	    	String keycloakId = authService.createUser(requestBody.getUsername(), requestBody.getEmail(), requestBody.getPassword(),requestBody.getFirstName(),requestBody.getLastName());
-	    	kafkaProducerService.sendUserEvent(requestBody);
-//	    	
-	        return keycloakId;
+	    	keycloakResponse = authService.createUser(requestBody.getUsername(), requestBody.getEmail(), requestBody.getPassword(),requestBody.getFirstName(),requestBody.getLastName());
+	    	if(keycloakResponse.getStatus()==200) {
+	    		requestBody.setKeycloakId(keycloakResponse.getData().toString());
+		    	kafkaProducerService.sendUserEvent(requestBody);
+	    	}   	
+	        return keycloakResponse;
 	    }
 	    
 	    @PostMapping("/login")

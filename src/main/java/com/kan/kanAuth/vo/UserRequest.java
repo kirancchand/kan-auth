@@ -1,6 +1,7 @@
 package com.kan.kanAuth.vo;
 
 public class UserRequest {
+	private String keycloakId;
 	private String username;
 	private String email;
 	private String password;
@@ -86,5 +87,11 @@ public class UserRequest {
 	}
 	public void setBranch(ValueLabel branch) {
 		this.branch = branch;
+	}
+	public String getKeycloakId() {
+		return keycloakId;
+	}
+	public void setKeycloakId(String keycloakId) {
+		this.keycloakId = keycloakId;
 	}
 }

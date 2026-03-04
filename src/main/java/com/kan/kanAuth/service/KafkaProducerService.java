@@ -52,6 +52,7 @@ public class KafkaProducerService {
 
     public void sendUserEvent(UserRequest user) {
     	try {
+    		System.out.println(user.getKeycloakId());
     		System.out.println("Sending to Kafka: ");
     		KafkaSender kafkaSender = new KafkaSender();
  
