@@ -75,7 +75,11 @@ public class AuthService {
 
 	    @Value("${keycloak.client-secret}")
 	    private String clientSecret;
-
+	    
+	    @Value("${spring.master-url}")
+	    private String masterUrl;
+	    	    
+	    
 	    private Keycloak keycloak;
 	    
 
@@ -141,7 +145,8 @@ public class AuthService {
 
 	    public Map<String, Object> login(String username, String password) {
 	        String tokenUrl = serverUrl +"/realms/"+ realm + "/protocol/openid-connect/token";
-	        
+	        String userInfoUrl = masterUrl+"/master/users/getUserInfo";
+
 //	        String tokenUrl = "http://localhost:8080/realms/" + realm + "/protocol/openid-connect/token";
 
 	        HttpHeaders headers = new HttpHeaders();
@@ -162,9 +167,31 @@ public class AuthService {
 	                request,
 	                Map.class
 	        );
+	        
+	        Map<String, Object> finalResponse = response.getBody();
+	        HttpHeaders serviceHeaders = new HttpHeaders();
+	        serviceHeaders.setContentType(MediaType.APPLICATION_JSON);
+	        String accessToken = (String) finalResponse.get("access_token");
+	        serviceHeaders.setBearerAuth(accessToken);
+	        
+//	        Map<String, String> bodyMap = new HashMap<>();
+//	        bodyMap.put("username", username);
+//	        bodyMap.put("password", password);
+//	        System.out.println("bodyMap"+bodyMap);
+	        HttpEntity<Map<String, String>> serviceRequest = new HttpEntity<>(serviceHeaders);
+	        System.out.println("serviceRequest"+serviceRequest);
+	        ResponseEntity<Map> userInfoResponse = restTemplate.exchange(
+	                userInfoUrl,
+	                HttpMethod.POST,   // change to POST if required
+	                serviceRequest,
+	                Map.class
+	        );
+	        finalResponse.put("userInfo", userInfoResponse.getBody());
 
 	        // Response contains access_token, refresh_token, expires_in etc.
-	        return response.getBody();
+//	        return response.getBody();
+	        return finalResponse;
+
 	    }
 	    
 //	    public boolean isTokenValid(String token) {
