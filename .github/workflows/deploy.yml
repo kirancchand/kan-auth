@@ -33,7 +33,7 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
         source: "kanAuth.jar"
-        target: "/home/${{ secrets.EC2_USER }}/kan-auth"
+        target: "/home/${{ secrets.EC2_USER }}/kan/kan-auth"
 
     - name: Restart Service
       uses: appleboy/ssh-action@v1.0.3
