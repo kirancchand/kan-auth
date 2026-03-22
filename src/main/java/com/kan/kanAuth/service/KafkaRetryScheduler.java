@@ -69,7 +69,7 @@ public class KafkaRetryScheduler {
 //
 //    }
     
-    @Scheduled(fixedDelay = 60000) // Run every minute
+    @Scheduled(fixedDelay = 2592000000L) // 60000Run every minute
     public void retryFailedMessages() {
     	String query = sqlQueryLoader.get("select.outbox.failed");
 //    	String query = """
